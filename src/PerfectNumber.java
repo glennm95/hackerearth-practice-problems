@@ -1,36 +1,47 @@
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.*;
+import java.util.HashMap;
 
 public class PerfectNumber {
     public static boolean isPerfectNumber(int n){
         int sum = 0;
-        ArrayList<Integer> divisors = new ArrayList<>();
+        HashMap<Integer, String> map = new HashMap<>();
 
-        for(int i=1; i<=n-1; i++)
-            if(n%i == 0)
-                divisors.add(i);
+        map.put(1,"");  // 1 is divisor of every +ve integer
+
+        for(int i=2; i<=n/2; i++) {         // loop starts from 2 since 1 is already added
+            if (map.containsKey(i))
+                break;
+            if (n % i == 0) {
+                map.put(i, "");             // pair-wise addition of divisors
+                map.put(n / i, "");
+            }
+        }
 
 
-        for(int x: divisors)
+        for(int x: map.keySet())
             sum += x;
 
-        System.out.println(divisors);
+        System.out.println(map.keySet());
 
         return sum == n;
 
     }
 
 
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        int n_testCases = in.nextInt();
+        int n_testCases = Integer.parseInt(br.readLine());
 
         for(int i=0; i<n_testCases; i++){
-            if(isPerfectNumber(in.nextInt()))
-                System.out.println("yes");
+            if(isPerfectNumber(Integer.parseInt(br.readLine())))
+                bw.write("yes\n");
             else
-                System.out.println("no");
+                bw.write("no\n");
         }
+
+        br.close();
+        bw.close();
     }
 }
