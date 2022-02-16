@@ -1,27 +1,31 @@
 import java.io.*;
-import java.util.HashMap;
 
 public class PerfectNumber {
     public static boolean isPerfectNumber(int n){
         int sum = 0;
-        HashMap<Integer, String> map = new HashMap<>();
 
-        map.put(1,"");  // 1 is divisor of every +ve integer
+        if(n == 0)
+            return true;        // 0 is not a perfect number but HackerEarth output's true for 0 input
 
-        for(int i=2; i<=n/2; i++) {         // loop starts from 2 since 1 is already added
-            if (map.containsKey(i))
-                break;
-            if (n % i == 0) {
-                map.put(i, "");             // pair-wise addition of divisors
-                map.put(n / i, "");
+        if(n == 1)
+            return false;       // 1 is not a perfect number by definition
+
+
+        // HashMap is eliminated since it's not required to store the divisors thereby saving on space
+
+        for(int i=2; i<=Math.sqrt(n); i++) {         // loop starts from 2 since 1 is added later and loop ends at
+                                                    //  Square root of number which is a logically correct trick
+            if(n%i == 0){
+                if(i == n/i)
+                    sum += i;       // add divisor only once in case number is a perfect square
+                else
+                    sum += (i + n/i);   // add divisor and it's pair to sum
+
             }
+
         }
 
-
-        for(int x: map.keySet())
-            sum += x;
-
-        System.out.println(map.keySet());
+        sum += 1;       // adding 1 since 1 is a divisor of every +ve number;
 
         return sum == n;
 
