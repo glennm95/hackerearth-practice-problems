@@ -1,3 +1,33 @@
+/*
+Definition of Perfect number:
+A perfect number is a positive integer that is equal to the sum of its proper positive divisors excluding the number itself. By this definition, 1 is not a perfect number.
+
+Input Format
+The first line contains a single integer T denoting the number of testcases. Next T lines contains a single integer each.
+
+Output Format
+For each test case print the yes or no on a single line.
+
+Constraint
+1 ≤ T ≤ 105
+0 ≤ x ≤ 1,000,000,000
+
+Note Please consider 0 as perfect number and print Yes.
+
+Sample Input
+2
+6
+2
+
+Sample Output
+yes
+no
+
+Explanation
+Take number 6. Proper positive divisors of 6 is 1,2,3 and their sum is 1+2+3=6. So, 6 is a perfect number. Similarly, 2 is not a perfect number.
+ */
+
+
 import java.io.*;
 
 public class PerfectNumber {
