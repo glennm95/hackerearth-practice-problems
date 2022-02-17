@@ -28,16 +28,25 @@ Here, A[4] + A[5] = 4 + 5 = 9. So, the answer is YES.
  */
 
 import java.io.*;
+import java.util.Arrays;
 
 public class PairSums {
     public static boolean isPairSum(int[] inArray, int targetSum){
 
-        for(int i=0; i<inArray.length-1; i++){
-            for(int j=i+1; j<inArray.length; j++){
-                if(inArray[i] + inArray[j] == targetSum)
-                    return true;
-            }
+        int left = 0, right = inArray.length-1;
+        Arrays.sort(inArray);   // O(nlogn)
+
+        // left and right pointers. Increment left or decrement right depending on inArray[left]+inArray[right] < or > targetSum
+
+        while(left < inArray.length-1 && right >= 0) {      //O(n)
+            if (inArray[left] + inArray[right] == targetSum)
+                return true;
+            if (inArray[left] + inArray[right] < targetSum)
+                left += 1;
+            else
+                right -= 1;
         }
+
         return false;
     }
 
