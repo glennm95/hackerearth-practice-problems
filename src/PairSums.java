@@ -29,22 +29,17 @@ Here, A[4] + A[5] = 4 + 5 = 9. So, the answer is YES.
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class PairSums {
     public static boolean isPairSum(int[] inArray, int targetSum){
+        HashMap<Integer,String> map = new HashMap<>();
 
-        int left = 0, right = inArray.length-1;
-        Arrays.sort(inArray);   // O(nlogn)
-
-        // left and right pointers. Increment left or decrement right depending on inArray[left]+inArray[right] < or > targetSum
-
-        while(left < inArray.length-1 && right >= 0) {      //O(n)
-            if (inArray[left] + inArray[right] == targetSum)
-                return true;
-            if (inArray[left] + inArray[right] < targetSum)
-                left += 1;
-            else
-                right -= 1;
+        for(int x: inArray){                // O(n)
+            if(map.containsKey(x))          // O(1), HashMap constant lookup
+                return true;                // if element is found in HashMap => complement of element is present in
+                                            // input array => pair of nos. summing to target is found in input
+            map.put(targetSum - x,"");      // store complement of number in HashMap
         }
 
         return false;
