@@ -31,25 +31,20 @@ Pairs are ((1, 1), (0, 0)) and ((2, 2), (1, 1))
 
  */
 
-// need to push code to git and answer corresponding leetcode query online
-
-
-import java.util.HashMap;
 import java.util.Random;
-
 
 public class SmallestCommonSubstring{
 
     public static void main(String[] args) {
-        HashMap<Character, Integer> mapA = new HashMap<>();     // HashMap from character to # times the
-        HashMap<Character, Integer> mapB = new HashMap<>();     // character appears in the String
+        int[] charA = new int[26];              // use arrays of size 26 to store count of each character in A and
+        int[] charB = new int[26];              // similarly, for B
 
         // generate random Strings from pool of lowercase English characters
         String alphas = "abcdefghijklmnopqrstuvwxyz";
 
         Random r = new Random();
-        StringBuilder A = new StringBuilder(100);
-        StringBuilder B = new StringBuilder(100);
+        StringBuilder A = new StringBuilder();
+        StringBuilder B = new StringBuilder();
 
         for(int i=0; i<100000; i++){
             A.append(alphas.charAt(r.nextInt(26)));
@@ -62,38 +57,23 @@ public class SmallestCommonSubstring{
 //        System.out.println(A);
 //        System.out.println(B);
 
-        // Add characters from A into HashMap
+        // Add character count of chars in A to charA
         for(int i=0; i<A.length(); i++){
             char curr = A.charAt(i);
-            if(!mapA.containsKey(curr))
-                mapA.put(curr, 1);                          // character appears once in the String (first encounter)
-            else
-                mapA.replace(curr, mapA.get(curr)+1);       // character encountered again, increment map value by 1
+            charA[curr - 'a'] += 1;
         }
 
-        // Add characters from B into HashMap
+        // Add character count of chars in B to charB
         for(int i=0; i<B.length(); i++){
             char curr = B.charAt(i);
-            if(!mapB.containsKey(curr))
-                mapB.put(curr, 1);
-            else
-                mapB.replace(curr, mapB.get(curr)+1);
+            charB[curr - 'a'] += 1;
         }
-
-//        System.out.println(mapA);
-//        System.out.println(mapB);
 
         int count = 0;
 
-        for(char z: mapA.keySet()){
-            if(mapB.containsKey(z)){
-                count += mapA.get(z) * mapB.get(z);         // total number of different pairs of ((i,j),(k,l)) will be
-            }                                               // (# of positions z is present in A) * (# of positions z
-        }                                                   // is present in B) Eg. if 'c' is present in A 3 times
-                                                            // & 'c' is present in B 4 times then the total #
-                                                            // ((i,j),(k,l)) pairs are 3*4=12
+        for(int i=0; i<26; i++)
+            count += charA[i]*charB[i];         // for uncommon characters, ith position will be 0 either in
+                                                // charA or charB hence will not contribute to count
         System.out.println(count);
-
-        
     }
 }
