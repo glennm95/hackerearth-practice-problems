@@ -43,171 +43,171 @@ required is 3.
  */
 
 import java.io.*;
-import java.util.ArrayList;
 
 public class PalindromeSubstring {
 
-    public static String buildPalindrome(String s, boolean palType){
+    public static int getCost(String s, String sPal){
         /*
-        builds even length palindrome of String s if palType is true and odd length palindrome (middle character not
-        repeated) if palType is false.
+        returns Cost i.e. no. of character replacement operations in s required to transform s to sPal
          */
 
-        if(palType)
-            return s.concat(new StringBuilder(s).reverse().toString());
-        else
-            return s.substring(0, s.length()-1).concat(new StringBuilder(s).reverse().toString());
+        int cost = 0;
+
+        for(int i=0; i<s.length(); i++)
+            if(s.charAt(i) != sPal.charAt(i))
+                cost += 1;
+
+        return cost;
+    }
+
+    public static String buildPalindrome(String s, boolean part){
+        /*
+        Takes string s and boolean, part, to indicate which part of s is to be retained while constructing palindrome
+        If part is true then left-half of s is retained and if false, then right-half is retained.
+        Eg.:  s: london, part: true => output: lonnol
+              s: paris, part: false => output: siris
+         */
+
+        String halfString;
+
+        // retain left part of s
+        if(part){
+            halfString = s.substring(0, s.length()/2);
+            if(isEvenString(s))
+                return halfString.concat(new StringBuilder(halfString).reverse().toString());
+            else
+                return halfString.concat(new StringBuilder(s.substring(0, s.length()/2+1)).reverse().toString());
+        }
+
+        // retain right part s
+        else {
+            halfString = s.substring(s.length()/2);
+            if (isEvenString(s)) {
+                return new StringBuilder(halfString).reverse().toString().concat(halfString);
+            } else {
+                return new StringBuilder(halfString).reverse().toString().concat(halfString.substring(1));
+            }
+        }
     }
 
     public static boolean isEvenString(String s){
         return s.length()%2==0;
     }
 
-
-    public static int getAppropriatePositionForS2InS1(String s1, String s2){
-        int j = 0, palCharCount, minPalCharCount = 5001, posForS2 = 0;      // max length of s1 and s2 inputs is 5000
-
-        ArrayList<Integer> palCharIndexes = new ArrayList<>();
+    public static boolean containsEqualChars(String s){
         /*
-        palCharIndexes is used to store indexes of s1 characters (left-half) that have a matching partner
-        (palindrome character) in the right half of s1. While inserting s2 in s1, we want to place s2 in s1
-        in such a way that s2 doesn't replace such palindrome characters which will thereby reduce the number of
-        replacement operations to get to the output from the original input String s1.
+        If all characters in String s are equal then return true
          */
 
-        for(int i=0; i<s1.length()/2; i++)
-            if(s1.charAt(i) == s1.charAt(s1.length()-1-i))
-                palCharIndexes.add(i);
-
-        while((isEvenString(s1) && j+s2.length()-1 < s1.length()/2) ||
-                (!isEvenString(s1) && j+s2.length()-1 <= s1.length()/2)){   //while loop runs until middle of s1
-            palCharCount = 0;
-
-            /*
-            for every position j of s2 in left-half of s1 (until right edge of s2 is at mid of s1) loop through
-            palCharIndexes and find the number of palindrome characters between j and j+s2.length()-1 both inclusive
-            and finally output the position containing the least palindrome characters that will be affected by
-            replacement. If we find a position for s2 that doesn't affect any palindrome chars then break out of the
-            loop and return that position.
-             */
-            for(int i: palCharIndexes)
-                if(i>=j && i<j+s2.length())
-                    palCharCount += 1;
-
-            if(palCharCount < minPalCharCount) {
-                minPalCharCount = palCharCount;
-                posForS2 = j;
-            }
-            if(minPalCharCount == 0)
-                break;
-            j += 1;
+        char c = s.charAt(0);
+        for(int i=1; i<s.length(); i++){
+            if(s.charAt(i) != c)
+                return false;
         }
-        return posForS2;
+        return true;
     }
 
-    public static String getS1PalindromeContainingS2(String s1, String s2) {
+    public static String getPalindromicSubstring(String s1, String s2){
 
-        String s2Reverse = new StringBuilder(s2).reverse().toString();
-        int s1Length = s1.length(), s2Length = s2.length(), s1HalfLength = s1Length/2, s2HalfLength = s2Length/2,
-                start, end;
-        String halfPalindrome = "";
-        String outputPalindrome = "";
+        String palindromicSubstring, s1Pal, s2Rev = new StringBuilder(s2).reverse().toString();
+        int i=0, cost, minCost=5001, minCostPos = -1;
 
-        if(s1Length < s2Length)
+        /*
+        if substring length is greater than original string or
+        if substring is not a palindrome and substring length is greater than half-length of original string then
+        output not possible, handled separately for both even and odd cases
+         */
+        if (s1.length() < s2.length() || (!s2.equals(s2Rev) && s2.length()>s1.length()/2 && isEvenString(s1)) ||
+                (!s2.equals(s2Rev) && s2.length()>s1.length()/2+1 && !isEvenString(s1)))
             return "";
 
-        if(!s1.contains(s2)){
+        // if substring is a palindrome and s1 does not contain s2
+        if(s2.equals(s2Rev) && !s1.contains(s2)){
 
-            // if s2 is palindromic and s1 and s2 are both even or both odd, then place s2 in center of s1
-            if(s2.equals(s2Reverse)){
-                start = s1HalfLength - s2HalfLength;
-                end = start + s2Length;
+            /*
+            if s2 is a substring of just one repeated character eg.: bbb, therefore s2 is a palindrome and if
+            s1 and s2 are either even or odd or vice-versa respectively then increment s2 by one more character and
+            eventually place s2 in s1 (s2 retains its original substring form and is placed in s1 with minimum
+            replacement operations)
+             */
+            if(containsEqualChars(s2) &&
+                    ((isEvenString(s1) && !isEvenString(s2)) || (!isEvenString(s1) && isEvenString(s2))))
+                s2 = s2.concat(s2.substring(0,1));
 
-                // s1 and s2 are both even length strings
-                if(isEvenString(s1) && isEvenString(s2)){
-                    halfPalindrome = new StringBuilder(s1).replace(start, end, s2).substring(0, s1HalfLength);
-                    outputPalindrome = buildPalindrome(halfPalindrome, true);
-                }
-
-                // s1 and s2 are both odd length strings
-                else if(!isEvenString(s1) && !isEvenString(s2)){      // s1 and s2 are odd length strings
-                    halfPalindrome = new StringBuilder(s1).replace(start, end, s2).substring(0, s1HalfLength + 1);
-                    outputPalindrome = buildPalindrome(halfPalindrome, false);
-                }
-
-
-                else if(isEvenString(s1) && !isEvenString(s2)){
-                    if(s2Length <= s1HalfLength){
-                        start = getAppropriatePositionForS2InS1(s1, s2);
-                        halfPalindrome = new StringBuilder(s1).replace(start, end, s2).substring(0, s1HalfLength);
-                    }
-                }
-                else{   // s1 is odd and s2 is even
-                    if(s2Length <= s1HalfLength+1){
-                        start = getAppropriatePositionForS2InS1(s1, s2);
-                        halfPalindrome = new StringBuilder(s1).replace(start, end, s2).substring(0, s1HalfLength + 1);
-                    }
-
-                }
-
+            /*
+            if s1 and s2 are both even or both odd lengths then place s2 in middle of s1
+             */
+            int start = s1.length()/2 - s2.length()/2;
+            int end = start + s2.length();
+            if((isEvenString(s1) && isEvenString(s2)) || (!isEvenString(s1) && !isEvenString(s2))) {
+                palindromicSubstring =
+                        buildPalindrome(new StringBuilder(s1).replace(start, end, s2).toString(), true);
+                return palindromicSubstring;
             }
-
-            else if((isEvenString(s1) && s1HalfLength >= s2Length) || (!isEvenString(s1) && s1HalfLength + 1 >= s2Length)){
-                start = getAppropriatePositionForS2InS1(s1, s2);
-                end = start + s2Length;
-                halfPalindrome = new StringBuilder(s1).replace(start, end, s2).substring(0, s1HalfLength);
-
-            }
-
-
         }
 
-        else{
-            // s1 contains s2, if s1 contains s2 then that automatically means that s2.length < s1.length/2
+        /*
+        Try placing s2 at each position in s1 and calculate the cost of such a placement. However, substring should not
+        be placed such that it crosses the middle of s1 (If so, then part of substring s2 will be lost).
+        Finally, return the placement with minimum cost (replacement operations).
+         */
+        while(i <= s1.length()-s2.length()){
 
-            // if s2 is completely in right half of s1
-            // it must be remembered that indexOf returns the first occurrence of s2 in s1
-            // therefore below we look from the rightmost side of s1, to make sure that we get the rightmost
-            // occurrence of s2 if present
-            if(s1.lastIndexOf(s2) >= s1HalfLength)
-                halfPalindrome = new StringBuilder(s1.substring(s1HalfLength, s1Length)).reverse().toString();
-            //above works for both even and odd lengths of s1
+            // place s2 at each position on left half of s1
+            if((isEvenString(s1) && i+s2.length()-1 < s1.length()/2) ||
+                    (!isEvenString(s1) && i+s2.length()-1 <= s1.length()/2))
+                s1Pal = buildPalindrome(new StringBuilder(s1).replace(i, i+s2.length(), s2).toString(), true);
 
-            // if s2 is completely in left half of s1 based on whether s1 is even or odd
-            else if(isEvenString(s1) && s1.indexOf(s2) + s2Length - 1 < s1HalfLength){
-                    halfPalindrome = s1.substring(0, s1HalfLength);
-            }
-            else if(!isEvenString(s1) && s1.indexOf(s2) + s2Length - 1 <= s1HalfLength){
-                    halfPalindrome = s1.substring(0, s1HalfLength+1);
-            }
-            // if all the three above cases are not satisfied, it means that s2 is not present in right half of s1
-            // and s2 is not present in the left half of s1 such that first index of s2 + length of s2 < mid of s1
-            // so the final possibility is that s2 is in s1 but crosses mid of s1
-            // in such case, first check if s2 < s1/2 - will be different for even and odd s1
-            // if true then select the best hole to accommodate s2 and place s2 there
-            else{
-                int posForS2 = getAppropriatePositionForS2InS1(s1, s2);
-                if(isEvenString(s1) && s2Length <= s1HalfLength){
-                    halfPalindrome = new StringBuilder(s1).replace(posForS2, posForS2+s2Length, s2).substring(0, s1HalfLength);
-                }
-                else if(!isEvenString(s1) && s2Length <= s1HalfLength+1){
-                    halfPalindrome = new StringBuilder(s1).replace(posForS2, posForS2+s2Length, s2).substring(0, s1HalfLength+1);
-                }
+            // place s2 at each position on right half of s1
+            else
+                s1Pal = buildPalindrome(new StringBuilder(s1).replace(i, i + s2.length(), s2).toString(), false);
+
+            cost = getCost(s1, s1Pal);
+            if (cost < minCost){
+                minCost = cost;
+                minCostPos = i;
             }
 
-
+            i += 1;
+            if(i+s2.length()-1 == s1.length()/2)
+                i = s1.length()/2;
         }
 
+//        separate while loops for left and right halves of s1
+//        while((i+s2.length()-1 < s1.length()/2 && isEvenString( s1)) ||
+//                (i+s2.length()-1 <= s1.length()/2 && !isEvenString(s1))){
+//            s1Pal = buildPalindrome(new StringBuilder(s1).replace(i, i+s2.length(), s2).toString(), true);
+//            cost = getCost(s1, s1Pal);
+//            if (cost < minCost){
+//                minCost = cost;
+//                minCostPos = i;
+//            }
+//
+//            i += 1;
+//        }
+//
+//
+//        // do another while loop for the right half of s1 too.
+//        i = s1.length()/2;
+//        while(i+s2.length()-1 < s1.length()){
+//            s1Pal = buildPalindrome(new StringBuilder(s1).replace(i, i+s2.length(), s2).toString(), false);
+//            cost = getCost(s1, s1Pal);
+//            if (cost < minCost){
+//                minCost = cost;
+//                minCostPos = i;
+//            }
+//
+//            i += 1;
+//        }
 
-        if(!halfPalindrome.equals("")) {
-            if (isEvenString(s1))
-                outputPalindrome = buildPalindrome(halfPalindrome, true);
-            else if (!isEvenString(s1))
-                outputPalindrome = buildPalindrome(halfPalindrome, false);
-        }
+        if(minCostPos < s1.length()/2)
+            palindromicSubstring = buildPalindrome(new StringBuilder(s1).replace(minCostPos, minCostPos + s2.length(), s2).toString(), true);
+        else
+            palindromicSubstring = buildPalindrome(new StringBuilder(s1).replace(minCostPos, minCostPos + s2.length(), s2).toString(), false);
 
-        return outputPalindrome;
+        return palindromicSubstring;
     }
+
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -219,28 +219,23 @@ public class PalindromeSubstring {
             String s1 = br.readLine();
             String s2 = br.readLine();
 
-            String out = getS1PalindromeContainingS2(s1,s2);
+            String out = getPalindromicSubstring(s1, s2);
 
-            int nOperations = 0;
-
-//            System.out.println(out);
-//            System.out.println(s1.length());
-//            System.out.println(s2.length());
-//            System.out.println(out.length());
-
-            if(!out.equals("")) {
-                for (int i = 0; i < s1.length(); i++)
-                    if (out.charAt(i) != s1.charAt(i))
-                        nOperations += 1;
-                bw.write(nOperations + "\n");
-            }
-            else
+            if(out.equals(""))
                 bw.write("-1\n");
 
-            bw.close();
+            else
+                bw.write(getCost(out, s1) + "\n");
+
+//            System.out.println("output string = " + out);
+//            System.out.println("original size = "+s1.length());
+//            System.out.println("output size = "+out.length());
+//            System.out.println("substring size = "+s2.length());
+//            System.out.println("replacements = " + getCost(out, s1));
 
             nCases -= 1;
         }
+        bw.close();
 
     }
 }
